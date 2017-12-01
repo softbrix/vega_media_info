@@ -6,7 +6,7 @@ addons:
 node_js:
 - node
 install:
-- npm install
+- yarn -i
 script:
 - npm test
 deploy:
