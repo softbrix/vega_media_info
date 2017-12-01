@@ -1,0 +1,38 @@
+{
+  "name": "vega_media_info",
+  "version": "0.1.0",
+  "description": "An image and video meta data extracter/updater",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/softbrix/vega_media_info/"
+  },
+  "keywords": [
+    "exif",
+    "media",
+    "video",
+    "image",
+    "jpg",
+    "jpeg",
+    "mpeg",
+    "mpg",
+    "meta"
+  ],
+  "author": "Andreas Sehr",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "exif": "^0.6.0",
+    "exiftool": "0.0.3",
+    "fs-extra": "^4.0.2",
+    "node-iptc": "^1.0.5",
+    "piexifjs": "^1.0.3",
+    "q": "^1.5.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "mocha": "^4.0.1"
+  }
+}
