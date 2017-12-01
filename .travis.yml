@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- node
+install:
+- npm install
+script:
+- npm test
+deploy:
+  provider: npm
+  email: andreas@softbrix.se
+  api_key:
+    secure: HEkSuXKllgl5YQS8F8EgO6jbc/po+a/Vk6OvnTn7Vgqd1s/CeWC867KMF21DemZQLnwoy9/MIQ6OqeKYr4+sshXILAw6ehncTEyzFaBUYlx4GNAWC8IK7Cifb6piluEUrakmh2912Vy/ElxUV7QltXk/X6iCSU1tc4HaMnIPXYCawi46RcJTEj93oFaPe6zCn1Jg6LqocFw2XmoQ/hLDHaMwccyBul2IHhUU7lTA0qV7Fbt3Onr0Homv29jDngqhPiVU/ImEACub+045lAoOIsazCjhXj4ngto3DlQBIwbiG1q4SiU9W09/HUkH7WbuFBgKzXHW329FstwI6CzGqF0j2WG8iBpF0zvjYdJNgYO8Mf/rvVAVMt1ZYkqCIDMcRYkZ1B4lo2coPSPZXmJqrEfb8g2rULSIkwKkahz+fW22KmPcqjfMGifQUILHLmY9WZB6M6+Qp/hM0QQEzhl4atu8G15M/loBt9162gDP+obMGQ4Ix9IVncTyRQzbWqpMjC1NTt9GCIMYQvCl3o8LzSNTAZjKfdguAhZlAEKt6Sawz+MZDpfEw9Q5r3hD/FMZkcHE5kRESMJyRwiqaA5fMaH1pLIlAkR8oVf/vVOR2uahEZ57DD4zcjgbSAmUkidyYdcYAsFAj3T1agAqUnndZ3oEk6IX+fro3P6OgO9mYV44=
+  on:
+    tags: true
+    repo: softbrix/vega_media_info
