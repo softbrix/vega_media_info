@@ -34,6 +34,17 @@ describe('Vega Media Info', function() {
         });
   });
 
+  it('should return be able to remove tag from simple image', function() {
+    var TAG = 'Test tag';
+    return mediaInfo.removeTag(jpg_file, TAG).
+        then(function() {
+          return mediaInfo.getTags(jpg_file).
+             then(function(tags) {
+               assert.deepEqual([], tags);
+             });
+        });
+  });
+
   it('should return information for simple .JPG image', function() {
     return mediaInfo.readMediaInfo(jpg_file).
         then(function(info) {
