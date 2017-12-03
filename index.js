@@ -133,7 +133,7 @@ var fileSystemFallback = function(item) {
 
 var processFile = function(item) {
     var deffered = Q.defer();
-    var exifRegexp = /^(?!\.).+[jpe?g|m4a|mp4]$/i;
+    var exifRegexp = /^(?!\.).+[jpe?g|m4a|mp4|mov]$/i;
 
     var extension = path.extname(item);
 
@@ -144,6 +144,7 @@ var processFile = function(item) {
         //console.log('Use exif tool');
         return processExifTool(item);
       } else {
+        // TODO: Remove dependency
         return processPiexifJS(item);
       }
     } else {
