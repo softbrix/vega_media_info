@@ -1,6 +1,6 @@
 {
   "name": "vega_media_info",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "An image and video meta data extracter/updater",
   "main": "index.js",
   "scripts": {
