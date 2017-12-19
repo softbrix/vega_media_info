@@ -10,7 +10,7 @@ describe('Vega Media Info', function() {
   it('should return reject if no image found', function() {
     return mediaInfo.getTags(no_file).
         then(function(tags) {
-          assert.fail('Should reject if no image found');
+          assert.fail('Not rejected');
         }, function(error) {
           assert.ok(error);
         });
@@ -23,7 +23,7 @@ describe('Vega Media Info', function() {
         });
   });
 
-  it('should return be able to add tag to simple image', function() {
+  it('should be able to add tag to simple image', function() {
     var TAG = 'Test tag';
     return mediaInfo.addTag(jpg_file, TAG).
         then(function() {
@@ -34,7 +34,7 @@ describe('Vega Media Info', function() {
         });
   });
 
-  it('should return be able to remove tag from simple image', function() {
+  it('should be able to remove tag from simple image', function() {
     var TAG = 'Test tag';
     return mediaInfo.removeTag(jpg_file, TAG).
         then(function() {

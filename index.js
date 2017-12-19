@@ -14,7 +14,11 @@ var exif = require('./exiftool');
 // Allways itpc:keywords
 const tagHolderItpc = 'keywords';
 const tagsDelimiter = ';';
-const isImage = /^(?!\.).+[jpe?g|png|tiff|img]$/i;
+const isImageRegexp = /^(?!\.).+[jpe?g|png|tiff|img]$/i;
+
+function isImage(filePath) {
+  return isImageRegexp.test(path.basename(filePath))
+}
 
 // ex: 2015:12:11 12:10:09
 const dateRegexp = /^([\d]{2,4}).?(\d{1,2}).?(\d{1,2})\s(\d{1,2}).?(\d{1,2}).?(\d{1,2})/;
@@ -30,28 +34,11 @@ var normalizeDate = function(date) {
   return date;
 };
 
-var processExiftool = function(filename, tags, callback) {
+var processExifImage = function(fileName) {
   var deffered = Q.defer();
-
-//console.log("process", filename);
-  exif.metadata(filename, tags, function(error, metadata) {
-    if (error) {
-      deffered.reject(error);
-    } else {
-      deffered.resolve(metadata);
-    }
-    if(_.isFunction(callback)) {
-      callback(error, metadata);
-    }
-  });
-  return deffered.promise;
-};
-
-var processExifImage = function(item) {
-  var deffered = Q.defer();
-  new ExifImage({ image : item}, function (error, exifData) {
+  new ExifImage({ image : fileName}, function (error, exifData) {
       if (error) {
-          fileSystemFallback(item).then(deffered.resolve, deffered.reject);
+          fileSystemFallback(fileName).then(deffered.resolve, deffered.reject);
       } else {
         deffered.resolve({
             CreateDate : normalizeDate(exifData.exif.CreateDate),
@@ -67,12 +54,15 @@ var processExifImage = function(item) {
   return deffered.promise;
 };
 
-var processExifTool = function(item) {
+var processExifTool = function(fileName, tags) {
+  if(tags === undefined) {
+    tags = [];
+  }
   var deffered = Q.defer();
   /** exiftool: */
-  processExiftool(item, [], function(error, metadata) {
+  exif.metadata(fileName, tags, function(error, metadata) {
     if (error) {
-      deffered.reject(error);
+      return deffered.reject(error);
     } else {
       deffered.resolve({
           CreateDate : normalizeDate(metadata.createDate),
@@ -88,10 +78,10 @@ var processExifTool = function(item) {
   return deffered.promise;
 };
 
-var processPiexifJS = function(item) {
+var processPiexifJS = function(fileName) {
   var deffered = Q.defer();
   /** piexif: */
-  fs.readFile(item, (err, jpeg) => {
+  fs.readFile(fileName, (err, jpeg) => {
     if(err) {
       return deffered.reject(err);
     }
@@ -113,11 +103,11 @@ var processPiexifJS = function(item) {
 
 
 // This should be the suggested date, more insecure than the exif info
-var fileSystemFallback = function(item) {
+var fileSystemFallback = function(fileName) {
   var deffered = Q.defer();
-  fs.stat(item, function(error, stats) {
+  fs.stat(fileName, function(error, stats) {
     if (error) {
-        deffered.reject(error);
+        return deffered.reject(error);
     } else {
       deffered.resolve({
           CreateDate : stats.ctime,
@@ -131,46 +121,40 @@ var fileSystemFallback = function(item) {
   return deffered.promise;
 };
 
-var processFile = function(item) {
+var processFile = function(fileName) {
     var deffered = Q.defer();
     var exifRegexp = /^(?!\.).+[jpe?g|m4a|mp4|mov]$/i;
 
-    var extension = path.extname(item);
+    var extension = path.extname(fileName);
 
-    if(exifRegexp.test(path.basename(item))) {
-      if(isImage.test(path.basename(item))) {
-        return processExifImage(item);
+    if(exifRegexp.test(path.basename(fileName))) {
+      if(isImage(fileName)) {
+        return processExifImage(fileName);
       } else if(true) {
         //console.log('Use exif tool');
-        return processExifTool(item);
+        return processExifTool(fileName);
       } else {
         // TODO: Remove dependency
-        return processPiexifJS(item);
+        return processPiexifJS(fileName);
       }
     } else {
-      return fileSystemFallback(item);
+      return fileSystemFallback(fileName);
     }
 
 };
 
 var read_iptc = function(sourceFile) {
-  var deffered = Q.defer();
-  if(isImage.test(sourceFile)) {
+  if(isImage(sourceFile)) {
+    var deffered = Q.defer();
     fs.readFile(sourceFile, function(err, data) {
-      if (err) { deffered.reject(err); }
+      if (err) { return deffered.reject(err); }
       var iptc_data = iptc(data);
       deffered.resolve(iptc_data);
     });
+    return deffered.promise;
   } else {
-    processExiftool(sourceFile, function(err, data) {
-      if (err) {
-         deffered.reject(err);
-       } else {
-         deffered.resolve(data);
-      }
-    });
+    return processExifTool(sourceFile);
   }
-  return deffered.promise;
 };
 
 var read_tags = function(sourceFile) {
@@ -182,17 +166,8 @@ var read_tags = function(sourceFile) {
 };
 
 var saveTagsToFile = function(tags, sourceFile) {
-  var deffered = Q.defer();
   var newTagStr = tags.length > 0 ? tags.join(tagsDelimiter) : "";
-  processExiftool(sourceFile, ['-'+tagHolderItpc+'='+newTagStr, '-overwrite_original'], function(err /*, ignore */) {
-    //console.log('tags added', ignore);
-    if (err) {
-       deffered.reject(err);
-     } else {
-       deffered.resolve();
-    }
-  });
-  return deffered.promise;
+  return processExifTool(sourceFile, ['-'+tagHolderItpc+'='+newTagStr, '-overwrite_original']);
 };
 
 var extractTags = function(metadata) {
@@ -236,8 +211,8 @@ module.exports = {
     return read_tags(sourceFile).then(
       function(tags) {
         if(_.contains(tags, newTag)) {
-          tags = _.filter(tags, function(item) {
-            return item.valueOf() !== '' && item.valueOf() !== newTag.valueOf();
+          tags = _.filter(tags, function(tag) {
+            return tag.valueOf() !== '' && tag.valueOf() !== newTag.valueOf();
           });
           return saveTagsToFile(tags, sourceFile);
         }
