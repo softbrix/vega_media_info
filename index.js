@@ -1,7 +1,6 @@
 /* jshint: node */
 
 "use strict"
-var _ = require('underscore');
 var fs = require('fs-extra');
 var path = require('path');
 var Q = require('q');
@@ -174,7 +173,7 @@ var extractTags = function(metadata) {
   var tags = [],
       tagString = metadata[tagHolderItpc];
   if(tagString !== undefined) {
-    if(_.isArray(tagString)) {
+    if(Array.isArray(tagString)) {
       tagString = tagString[0];
     }
     tags = tagString.split(tagsDelimiter);
@@ -192,13 +191,13 @@ module.exports = {
     return read_tags(sourceFile).then(
       function(tags) {
         var tagCountStart = tags.length;
-        if(_.isArray(newTag)) {
-          _.each(newTag, function(tag) {
-            if(!_.contains(tags, tag)) {
+        if(Array.isArray(newTag)) {
+          newTag.forEach(function(tag) {
+            if(tags.indexOf(tag) < 0) {
               tags.push(tag);
             }
           });
-        } else if (!_.contains(tags, newTag)) {
+        } else if (tags.indexOf(newTag) < 0) {
             tags.push(newTag);
         }
         if (tagCountStart !== tags.length) {
@@ -210,10 +209,10 @@ module.exports = {
   removeTag : function(sourceFile, newTag) {
     return read_tags(sourceFile).then(
       function(tags) {
-        if(_.contains(tags, newTag)) {
-          tags = _.filter(tags, function(tag) {
-            return tag.valueOf() !== '' && tag.valueOf() !== newTag.valueOf();
-          });
+        if(tags.indexOf(newTag) >= 0) {
+          tags = tags.filter(
+            tag => tag.valueOf() !== '' && tag.valueOf() !== newTag.valueOf()
+          );
           return saveTagsToFile(tags, sourceFile);
         }
       });
