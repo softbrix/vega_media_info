@@ -2,7 +2,7 @@ language: node_js
 addons:
   apt:
     packages:
-      - libimage-exiftool-perl
+    - libimage-exiftool-perl
 node_js:
 - node
 install:
@@ -13,7 +13,7 @@ deploy:
   provider: npm
   email: andreas@softbrix.se
   api_key:
-    secure: HEkSuXKllgl5YQS8F8EgO6jbc/po+a/Vk6OvnTn7Vgqd1s/CeWC867KMF21DemZQLnwoy9/MIQ6OqeKYr4+sshXILAw6ehncTEyzFaBUYlx4GNAWC8IK7Cifb6piluEUrakmh2912Vy/ElxUV7QltXk/X6iCSU1tc4HaMnIPXYCawi46RcJTEj93oFaPe6zCn1Jg6LqocFw2XmoQ/hLDHaMwccyBul2IHhUU7lTA0qV7Fbt3Onr0Homv29jDngqhPiVU/ImEACub+045lAoOIsazCjhXj4ngto3DlQBIwbiG1q4SiU9W09/HUkH7WbuFBgKzXHW329FstwI6CzGqF0j2WG8iBpF0zvjYdJNgYO8Mf/rvVAVMt1ZYkqCIDMcRYkZ1B4lo2coPSPZXmJqrEfb8g2rULSIkwKkahz+fW22KmPcqjfMGifQUILHLmY9WZB6M6+Qp/hM0QQEzhl4atu8G15M/loBt9162gDP+obMGQ4Ix9IVncTyRQzbWqpMjC1NTt9GCIMYQvCl3o8LzSNTAZjKfdguAhZlAEKt6Sawz+MZDpfEw9Q5r3hD/FMZkcHE5kRESMJyRwiqaA5fMaH1pLIlAkR8oVf/vVOR2uahEZ57DD4zcjgbSAmUkidyYdcYAsFAj3T1agAqUnndZ3oEk6IX+fro3P6OgO9mYV44=
+    secure: K5wIbgvMxJ8pvTEand/WuzG19aH1RplSzA7bKDReN6y7C0VWWbPQIDbbmf5lpY5pR7fgyjLHZNwQjPcF/Rm7hUJImHTUEed6YFvcmCFNoyDT/r7VHLTMWJEoeEWR+HYpHLcXR3I49yDAHmhHPkRmdgx3W4QrIo53OrfeAGgYsA1WNyAg2AxBTdbYVC+bEsezIsoBy15i+c0u1gVEY/ztBrYgAIc7Gfs53O86VQp/DV3euQ3ID3rVpDS7mQBtbS+MJlECMcwZnnh1duPGJ6JE8rpoHfNGJZfj+8JkucQZNoJQ9S5BaAhZqiLjsypHhIj1tzkNmJ9rJEStxIChCXu/SYQtDt/f/slb+HzLn3hBsSlnauwSldvuBt6TodnQiSQ3yEaJQyWHqxG8M5vv9K7hZwdKaAR1NA3Vhr7Gw5opPrs9/7l6Rp/sVhxejWYXLwgFwT1dcp7HOtqxDEig28lKLI3P7nZW3juw5/zl12fzAlrKt9GBU1DB9d648Mpfzl6d1vqrS0ANIvXlhJ+W2roWeLuEbIU4N1Zd5ZxWBIMRjMm3/xNDKWCd5v41eVPrH+yfxVrwYUd/zevxFjwhDCVDv6XtaUYEssjAJQVg/BCWquweADG18hybKRUBFg/5qgPcX0W8FwKD5zLKSvGB4M8YFZqjUfPH7AqkBMVdMbEhe5o=
   on:
     tags: true
     repo: softbrix/vega_media_info
