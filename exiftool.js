@@ -1,5 +1,5 @@
 var ChildProcess = require('child_process');
-var fs = require('fs-extra');
+var fs = require('fs');
 
 // Accepts the raw binary content of a file and returns the meta data of the file.
 exports.metadata = function (source, tags, doneGettingMetadata) {
@@ -11,7 +11,7 @@ exports.metadata = function (source, tags, doneGettingMetadata) {
 
   var isFileSource = false;
   try {
-    //fs.accessSync(source, fs.F_OK | fs.R_OK | fs.W_OK);
+    fs.accessSync(source, fs.F_OK | fs.R_OK | fs.W_OK);
     isFileSource = true;
     tags.push(source);
   } catch(errIgnore) {
