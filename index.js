@@ -122,7 +122,7 @@ var fileSystemFallback = function(fileName) {
 
 var processFile = function(fileName) {
     var deffered = Q.defer();
-    var exifRegexp = /^(?!\.).+[jpe?g|m4a|mp4|mov]$/i;
+    var exifRegexp = /^(?!\.).+[jpe?g|m4a|m4v|mp4|mov]$/i;
 
     var extension = path.extname(fileName);
 
