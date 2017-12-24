@@ -94,7 +94,6 @@ describe('Vega Media Info', function() {
     return Promise.all([
       mediaInfo._processExifImage(file),
       mediaInfo._processExifTool(file),
-      mediaInfo._processPiexifJS(file),
       mediaInfo._processFileSystem(file)
     ]).then(console.log);
   });
@@ -110,7 +109,6 @@ describe('Vega Media Info', function() {
           mediaInfo._processExifImage(file)
           // Exif tool requires a lot more
         // mediaInfo._processExifTool(file)
-        //    mediaInfo._processPiexifJS(file)
         //    mediaInfo._processFileSystem(file)
         .then(function() {
           console.log(count);

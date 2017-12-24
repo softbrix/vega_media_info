@@ -7,7 +7,6 @@ var Q = require('q');
 
 var ExifImage = require('exif').ExifImage;
 var iptc = require('node-iptc');
-var piexif = require("piexifjs");
 var exif = require('./exiftool');
 
 // Allways itpc:keywords
@@ -83,29 +82,6 @@ var processExifTool = function(fileName, tags) {
   return deffered.promise;
 };
 
-var processPiexifJS = function(fileName) {
-  var deffered = Q.defer();
-  /** piexif: */
-  fs.readFile(fileName, (err, jpeg) => {
-    if(err) {
-      return deffered.reject(err);
-    }
-    var data = jpeg.toString("binary");
-    var exifData = piexif.load(data);
-    deffered.resolve({
-        CreateDate : normalizeDate(exifData.Exif[36867]),
-        ModifyDate : normalizeDate(exifData.Exif[36868]),
-        Width: exifData.Exif[40962],
-        Height: exifData.Exif[40963],
-        Tags : [],
-        Type: 'piexif',
-        origInfo : exifData
-    });
-  });
-
-  return deffered.promise;
-}
-
 
 // This should be the suggested date, more insecure than the exif info
 var fileSystemFallback = function(fileName) {
@@ -171,13 +147,12 @@ module.exports = {
 
       if(exifRegexp.test(path.basename(fileName))) {
         if(isImage(fileName)) {
+          // Exif image is much faster but only supports jpeg
           return processExifImage(fileName);
-        } else if(true) {
+        } else {
+          // Exiftool is an external dependency and needs to be installed on the system
           //console.log('Use exif tool');
           return processExifTool(fileName);
-        } else {
-          // TODO: Remove dependency
-          return processPiexifJS(fileName);
         }
       } else if(useFallback) {
         return fileSystemFallback(fileName);
@@ -223,6 +198,5 @@ module.exports = {
 /** Internal methods used for testing **/
   _processExifImage: processExifImage,
   _processExifTool: processExifTool,
-  _processPiexifJS: processPiexifJS,
   _processFileSystem: fileSystemFallback
 };

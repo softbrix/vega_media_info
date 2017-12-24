@@ -27,7 +27,6 @@
     "exif": "^0.6.0",
     "exiftool": "0.0.3",
     "node-iptc": "^1.0.5",
-    "piexifjs": "^1.0.3",
     "q": "^1.5.1"
   },
   "devDependencies": {
