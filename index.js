@@ -13,6 +13,7 @@ var exif = require('./exiftool');
 // Allways itpc:keywords
 const tagHolderItpc = 'keywords';
 const tagsDelimiter = ';';
+const exifRegexp = /^(?!\.).+[(j|m)pe?g|m4a|m4v|mp4|mov|avi]$/i;
 const isImageRegexp = /^(?!\.).+[jpe?g|png|tiff|img]$/i;
 
 function isImage(filePath) {
@@ -37,7 +38,7 @@ var processExifImage = function(fileName) {
   var deffered = Q.defer();
   new ExifImage({ image : fileName}, function (error, exifData) {
       if (error) {
-          fileSystemFallback(fileName).then(deffered.resolve, deffered.reject);
+        return deffered.reject(error);
       } else {
         deffered.resolve({
             CreateDate : normalizeDate(exifData.exif.CreateDate),
@@ -63,8 +64,13 @@ var processExifTool = function(fileName, tags) {
     if (error) {
       return deffered.reject(error);
     } else {
+      var createDate = metadata.createDate;
+      if(createDate === undefined) {
+        createDate = metadata['date/timeOriginal'];
+      }
+
       deffered.resolve({
-          CreateDate : normalizeDate(metadata.createDate),
+          CreateDate : normalizeDate(createDate),
           ModifyDate : normalizeDate(metadata.modifyDate),
           Width: metadata.imageWidth,
           Height: metadata.imageHeight,
@@ -120,28 +126,6 @@ var fileSystemFallback = function(fileName) {
   return deffered.promise;
 };
 
-var processFile = function(fileName) {
-    var deffered = Q.defer();
-    var exifRegexp = /^(?!\.).+[jpe?g|m4a|m4v|mp4|mov]$/i;
-
-    var extension = path.extname(fileName);
-
-    if(exifRegexp.test(path.basename(fileName))) {
-      if(isImage(fileName)) {
-        return processExifImage(fileName);
-      } else if(true) {
-        //console.log('Use exif tool');
-        return processExifTool(fileName);
-      } else {
-        // TODO: Remove dependency
-        return processPiexifJS(fileName);
-      }
-    } else {
-      return fileSystemFallback(fileName);
-    }
-
-};
-
 var read_iptc = function(sourceFile) {
   if(isImage(sourceFile)) {
     var deffered = Q.defer();
@@ -182,8 +166,23 @@ var extractTags = function(metadata) {
 };
 
 module.exports = {
-  readMediaInfo : function(sourceFile) {
-    return processFile(sourceFile);
+  readMediaInfo : function(fileName, useFallback) {
+      var extension = path.extname(fileName);
+
+      if(exifRegexp.test(path.basename(fileName))) {
+        if(isImage(fileName)) {
+          return processExifImage(fileName);
+        } else if(true) {
+          //console.log('Use exif tool');
+          return processExifTool(fileName);
+        } else {
+          // TODO: Remove dependency
+          return processPiexifJS(fileName);
+        }
+      } else if(useFallback) {
+        return fileSystemFallback(fileName);
+      }
+      return Q.reject('File type not recognized: ' + extension);
   },
 
   // CRUD Tags

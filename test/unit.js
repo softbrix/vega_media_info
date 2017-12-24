@@ -5,6 +5,7 @@ const mediaInfo = require('../index.js');
 describe('Vega Media Info', function() {
   var jpg_file = './test_data/img1.jpg';
   var mov_file = './test_data/test.mov';
+  var no_exif_file = './test_data/file.txt';
   var no_file = './test_data/no_file.jpg';
 
   it('should return reject if no image found', function() {
@@ -14,6 +15,23 @@ describe('Vega Media Info', function() {
         }, function(error) {
           assert.ok(error);
         });
+  });
+
+  it('should only use file system fallback if argument is set', function() {
+    var no_argument_promise = mediaInfo.readMediaInfo(no_exif_file).
+        then(function(tags) {
+          console.error(tags);
+          assert.fail('Not rejected');
+        }, function(error) {
+          assert.ok(error);
+        });
+    let with_argument_promise = mediaInfo.readMediaInfo(no_exif_file, true).
+        then(function(tags) {
+          assert.ok(tags);
+        }, function(error) {
+          assert.fail('Should have used file system as fallback');
+        });
+    return Promise.all([no_argument_promise, with_argument_promise]);
   });
 
   it('should return empty array for simple image', function() {
@@ -72,12 +90,39 @@ describe('Vega Media Info', function() {
   });
 
   xit('should expose internal test methods', function() {
+    var file = jpg_file;
     return Promise.all([
-      mediaInfo._processExifImage(jpg_file),
-      mediaInfo._processExifTool(jpg_file),
-      mediaInfo._processPiexifJS(jpg_file),
-      mediaInfo._processFileSystem(jpg_file)
+      mediaInfo._processExifImage(file),
+      mediaInfo._processExifTool(file),
+      mediaInfo._processPiexifJS(file),
+      mediaInfo._processFileSystem(file)
     ]).then(console.log);
+  });
+
+  xit('should be fast', function() {
+    var file = jpg_file;
+    var count = 0;
+    const LIMIT = 100;
+
+    return new Promise(function(resolve, reject) {
+      var process = function() {
+        // ExifImage does the processing in less than a second
+          mediaInfo._processExifImage(file)
+          // Exif tool requires a lot more
+        // mediaInfo._processExifTool(file)
+        //    mediaInfo._processPiexifJS(file)
+        //    mediaInfo._processFileSystem(file)
+        .then(function() {
+          console.log(count);
+          if(++count > LIMIT) {
+            resolve('done');
+          } else {
+            setTimeout(process,0);
+          }
+        }, reject);
+      };
+      process();
+    });
   });
 
 });
