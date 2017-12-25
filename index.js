@@ -12,11 +12,15 @@ var exif = require('./exiftool');
 // Allways itpc:keywords
 const tagHolderItpc = 'keywords';
 const tagsDelimiter = ';';
-const exifRegexp = /^(?!\.).+[(j|m)pe?g|m4a|m4v|mp4|mov|avi]$/i;
-const isImageRegexp = /^(?!\.).+[jpe?g|png|tiff|img]$/i;
+const exifRegexp = /((j|m)pe?g|m4a|m4v|mp4|mov|avi)$/i;
+const isImageRegexp = /(jpe?g|png|tiff|img)$/i;
 
 function isImage(filePath) {
-  return isImageRegexp.test(path.basename(filePath))
+  return isImageRegexp.test(path.basename(filePath));
+}
+
+function hasExifInfo(filePath) {
+  return exifRegexp.test(path.basename(filePath));
 }
 
 // ex: 2015:12:11 12:10:09
@@ -142,21 +146,20 @@ var extractTags = function(metadata) {
 };
 
 module.exports = {
-  readMediaInfo : function(fileName, useFallback) {
-      var extension = path.extname(fileName);
-
-      if(exifRegexp.test(path.basename(fileName))) {
-        if(isImage(fileName)) {
+  readMediaInfo : function(filePath, useFallback) {
+      if(hasExifInfo(filePath)) {
+        if(isImage(filePath)) {
           // Exif image is much faster but only supports jpeg
-          return processExifImage(fileName);
+          return processExifImage(filePath);
         } else {
           // Exiftool is an external dependency and needs to be installed on the system
           //console.log('Use exif tool');
-          return processExifTool(fileName);
+          return processExifTool(filePath);
         }
       } else if(useFallback) {
-        return fileSystemFallback(fileName);
+        return fileSystemFallback(filePath);
       }
+      var extension = path.extname(filePath);
       return Q.reject('File type not recognized: ' + extension);
   },
 

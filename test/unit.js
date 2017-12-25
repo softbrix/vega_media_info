@@ -89,6 +89,21 @@ describe('Vega Media Info', function() {
         });
   });
 
+  xit('should return information for simple .AVI file', function() {
+    return mediaInfo.readMediaInfo('./test_data/file.AVI').
+        then(function(info) {
+          assert.ok(info);
+
+          //assert.equal(info.CreateDate, info.ModifyDate);
+          assert.equal(info.Width, 640);
+          assert.equal(info.Height, 480);
+          assert.equal(info.Type, 'exifTool');
+
+          assert.ok(new Date(info.CreateDate));
+
+        });
+  });
+
   xit('should expose internal test methods', function() {
     var file = jpg_file;
     return Promise.all([

@@ -142,10 +142,6 @@ path-is-absolute@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
 
-piexifjs@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/piexifjs/-/piexifjs-1.0.3.tgz#99974058c0d2cb1fb8a92754c486fba4d8b3b0f0"
-
 q@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/q/-/q-1.5.1.tgz#7e32f75b41381291d04611f1bf14109ac00651d7"
