@@ -7,12 +7,23 @@ describe('Vega Media Info', function() {
   var mov_file = './test_data/test.mov';
   var no_exif_file = './test_data/file.txt';
   var no_file = './test_data/no_file.jpg';
+  var corrupt_file = './test_data/corrupt.jpg';
 
   it('should return reject if no image found', function() {
     return mediaInfo.getTags(no_file).
         then(function(tags) {
           assert.fail('Not rejected');
         }, function(error) {
+          assert.ok(error);
+        });
+  });
+
+  it('should return reject if failed to parse image', function() {
+    return mediaInfo.readMediaInfo(corrupt_file).
+        then(function(info) {
+          assert.fail('Not rejected');
+        }, function(error) {
+          console.log(error);
           assert.ok(error);
         });
   });
