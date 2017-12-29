@@ -8,5 +8,3 @@ if(process.argv.length < 3) {
 var sourceFile = process.argv[2];
 
 mediaInfo.readMediaInfo(sourceFile).then(console.log);
-
-mediaInfo.readMediaInfo(sourceFile).then(data => console.log(new Date((data.CreateDate || data.ModifyDate)/1)));
