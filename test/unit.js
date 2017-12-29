@@ -4,6 +4,7 @@ const mediaInfo = require('../index.js');
 
 describe('Vega Media Info', function() {
   var jpg_file = './test_data/img1.jpg';
+  var jpg_time_file = './test_data/timestamp.jpg';
   var mov_file = './test_data/test.mov';
   var no_exif_file = './test_data/file.txt';
   var no_file = './test_data/no_file.jpg';
@@ -23,7 +24,6 @@ describe('Vega Media Info', function() {
         then(function(info) {
           assert.fail('Not rejected');
         }, function(error) {
-          console.log(error);
           assert.ok(error);
         });
   });
@@ -84,6 +84,18 @@ describe('Vega Media Info', function() {
           assert.equal(info.Type, 'exifImage');
 
           assert.ok(new Date(info.CreateDate));
+        });
+  });
+
+  it('should return information for simple .JPG image with timestamp', function() {
+    return mediaInfo.readMediaInfo(jpg_time_file).
+        then(function(info) {
+          assert.ok(info);
+          assert.equal(info.CreateDate, undefined);
+          assert.equal(info.ModifyDate, '2017-1-8 00:57:52');
+          assert.equal(info.Width, 3660);
+          assert.equal(info.Height, 10194);
+          assert.equal(info.Type, 'exifImage');
         });
   });
 

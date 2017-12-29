@@ -23,6 +23,10 @@ function hasExifInfo(filePath) {
   return exifRegexp.test(path.basename(filePath));
 }
 
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 // ex: 2015:12:11 12:10:09
 const dateRegexp = /^([\d]{2,4}).?(\d{1,2}).?(\d{1,2})\s(\d{1,2}).?(\d{1,2}).?(\d{1,2})/;
 
@@ -33,6 +37,9 @@ var normalizeDate = function(date) {
     if(d.length > 3) {
       return new Date(d[1], d[2]-1, d[3], d[4], d[5], d[6], 0).toLocaleString();
     }
+  }
+  if(isNumeric(date)) {
+    return new Date(parseFloat(date)).toLocaleString();
   }
   return date;
 };
@@ -46,8 +53,8 @@ var processExifImage = function(fileName) {
         deffered.resolve({
             CreateDate : normalizeDate(exifData.exif.CreateDate),
             ModifyDate : normalizeDate(exifData.image.ModifyDate),
-            Width: exifData.exif.ExifImageWidth,
-            Height: exifData.exif.ExifImageHeight,
+            Width: exifData.exif.ExifImageWidth || exifData.image.ImageWidth,
+            Height: exifData.exif.ExifImageHeight || exifData.image.ImageHeight,
             //Tags : exifData.image.XPKeywords,
             Type: 'exifImage',
             origInfo : exifData
@@ -153,7 +160,6 @@ module.exports = {
           return processExifImage(filePath);
         } else {
           // Exiftool is an external dependency and needs to be installed on the system
-          //console.log('Use exif tool');
           return processExifTool(filePath);
         }
       } else if(useFallback) {
