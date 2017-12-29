@@ -1,4 +1,6 @@
 
+[![Build Status](https://travis-ci.org/softbrix/vega_media_info.svg?branch=master)](https://travis-ci.org/softbrix/vega_media_info)
+
 # Vega Media info
 
 The Vega Media info is a utility project to consolidate the information stored in media files.

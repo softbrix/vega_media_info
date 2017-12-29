@@ -92,7 +92,7 @@ describe('Vega Media Info', function() {
         then(function(info) {
           assert.ok(info);
           assert.equal(info.CreateDate, undefined);
-          assert.equal(info.ModifyDate, '2017-1-8 00:57:52');
+          assert.equal(info.ModifyDate, new Date(1483833472653).toLocaleString());
           assert.equal(info.Width, 3660);
           assert.equal(info.Height, 10194);
           assert.equal(info.Type, 'exifImage');
