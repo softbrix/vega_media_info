@@ -7,6 +7,7 @@ var path = require('path');
 const ExifImage = require('exif').ExifImage; // This will read exif info
 const iptc = require('node-iptc'); // This will only return the keywords tag
 const xmpReader = require('kopparmora-xmp-reader'); // This will read xmp info
+const jpgSize = require('./lib/jpgSize'); // This will read xmp info
 
 const exif = require('./exiftool');
 const regionInfoParser = require('./lib/regionInfo');
@@ -64,14 +65,15 @@ var processImageBuffer = function(buffer) {
   return Promise.all([
       exifImage(buffer),
       xmpReader.fromBuffer(buffer),
-      iptc(buffer)]
+      iptc(buffer),
+      jpgSize(buffer)]
     ).then(result => {
-    var [exifData, xmpData, iptc] = result;
+    var [exifData, xmpData, iptc, size] = result;
     return {
         CreateDate : normalizeDate(exifData.exif.CreateDate),
         ModifyDate : normalizeDate(exifData.image.ModifyDate),
-        Width: exifData.image.ImageWidth || exifData.exif.ExifImageWidth ,
-        Height: exifData.image.ImageHeight || exifData.exif.ExifImageHeight,
+        Width: size.width || exifData.image.ImageWidth || exifData.exif.ExifImageWidth ,
+        Height: size.height || exifData.image.ImageHeight || exifData.exif.ExifImageHeight,
         Tags : xmpData.keywords || iptc.keywords || [],
         Regions: regionInfoParser.parse(xmpData),
         Type: 'exifImage',

@@ -28,8 +28,8 @@ describe('Vega Media Info', function() {
             assert.ok(info);
             assert.equal(info.CreateDate, info.ModifyDate);
             // This size is stored in the exif information, but the actual image is smaller
-            assert.equal(info.Width, 2272);
-            assert.equal(info.Height, 1704);
+            assert.equal(info.Width, 480);
+            assert.equal(info.Height, 360);
             assert.equal(info.Type, 'exifImage');
 
             assert.ok(new Date(info.CreateDate));
@@ -161,7 +161,7 @@ describe('Vega Media Info', function() {
   });
 
   it('should expose internal test methods', function() {
-    var file = './test_data/arvid_me_picassa_2.jpg';
+    var file = jpg_file;
     return Promise.all([
       mediaInfo._processExifImage(file),
       mediaInfo._processExifTool(file),
@@ -170,7 +170,7 @@ describe('Vega Media Info', function() {
       assert.equal(a.CreateDate, b.CreateDate);
       assert.equal(a.Width, b.Width);
       assert.equal(a.Height, b.Height);
-      assert.deepEqual(a.Tags, b.Tags[0]);
+      assert.deepEqual(a.Tags, b.Tags);
       assert.deepEqual(a.Regions, b.Regions);
     });
   });
