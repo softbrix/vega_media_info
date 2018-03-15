@@ -3,7 +3,6 @@
 "use strict"
 var fs = require('fs');
 var path = require('path');
-var Q = require('q');
 
 const ExifImage = require('exif').ExifImage; // This will read exif info
 const iptc = require('node-iptc'); // This will only return the keywords tag
@@ -47,23 +46,8 @@ var normalizeDate = function(date) {
   return date;
 };
 
-const bufferLimit = 65536;
-let fileToBuffer = (file) => new Promise((resolve, reject) => {
-	fs.open(file, 'r', (err, fd) => {
-		if (err) reject(err);
-		else {
-			let buffer = new Buffer(bufferLimit);
-			fs.read(fd, buffer, 0, bufferLimit, 0, (err, bytesRead, buffer) => {
-				if (err) reject(err);
-				else resolve(buffer);
-			});
-		}
-	});
-});
-
-
 var processExifImage = function(sourceFile) {
-  return fileToBuffer(sourceFile).then(processImageBuffer);
+  return xmpReader.fileToBuffer(sourceFile).then(processImageBuffer);
 };
 
 var exifImage = function(buffer) {
@@ -100,56 +84,56 @@ var processExifTool = function(fileName, tags) {
   if(tags === undefined) {
     tags = [];
   }
-  var deffered = Q.defer();
-  /** exiftool: */
-  exif.metadata(fileName, tags, function(error, metadata) {
-    if (error) {
-      return deffered.reject(error);
-    } else {
-      if(Object.keys(metadata).length === 0) {
-        return deffered.resolve({});
+  return new Promise((resolve, reject) => {
+    /** exiftool: */
+    exif.metadata(fileName, tags, function(error, metadata) {
+      if (error) {
+        return reject(error);
+      } else {
+        if(Object.keys(metadata).length === 0) {
+          return resolve({});
+        }
+
+        var createDate = metadata.createDate;
+        if(createDate === undefined) {
+          createDate = metadata['date/timeOriginal'];
+        }
+
+        metadata.regionInfo = regionInfoParser.parse(metadata);
+
+        resolve({
+            CreateDate : normalizeDate(createDate),
+            ModifyDate : normalizeDate(metadata.modifyDate),
+            Width: metadata.imageWidth,
+            Height: metadata.imageHeight,
+            Tags : extractTags(metadata),
+            Regions: metadata.regionInfo,
+            Type: 'exifTool',
+            origInfo : metadata
+        });
       }
-
-      var createDate = metadata.createDate;
-      if(createDate === undefined) {
-        createDate = metadata['date/timeOriginal'];
-      }
-
-      metadata.regionInfo = regionInfoParser.parse(metadata);
-
-      deffered.resolve({
-          CreateDate : normalizeDate(createDate),
-          ModifyDate : normalizeDate(metadata.modifyDate),
-          Width: metadata.imageWidth,
-          Height: metadata.imageHeight,
-          Tags : extractTags(metadata),
-          Regions: metadata.regionInfo,
-          Type: 'exifTool',
-          origInfo : metadata
-      });
-    }
+    });
   });
-  return deffered.promise;
 };
 
 
 // This should be the suggested date, more insecure than the exif info
 var fileSystemFallback = function(fileName) {
-  var deffered = Q.defer();
-  fs.stat(fileName, function(error, stats) {
-    if (error) {
-        return deffered.reject(error);
-    } else {
-      deffered.resolve({
-          CreateDate : stats.ctime,
-          ModifyDate : stats.mtime,
-          Tags: [],
-          Type: 'system',
-          origInfo : stats
-      });
-    }
+  return new Promise((resolve, reject) => {
+    fs.stat(fileName, function(error, stats) {
+      if (error) {
+          return reject(error);
+      } else {
+        resolve({
+            CreateDate : stats.ctime,
+            ModifyDate : stats.mtime,
+            Tags: [],
+            Type: 'system',
+            origInfo : stats
+        });
+      }
+    });
   });
-  return deffered.promise;
 };
 
 var saveTagsToFile = function(tags, sourceFile) {
@@ -188,7 +172,7 @@ module.exports = {
         return fileSystemFallback(filePath);
       }
       var extension = path.extname(filePath);
-      return Q.reject('File type not recognized: ' + extension);
+      return Promise.reject('File type not recognized: ' + extension);
   },
 
   // CRUD Tags
@@ -208,7 +192,6 @@ module.exports = {
         if (tagCountStart !== tags.length) {
           return saveTagsToFile(tags, sourceFile);
         }
-        return Q.resolve();
       });
   },
   removeTag : function(sourceFile, newTag) {

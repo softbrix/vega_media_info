@@ -27,8 +27,7 @@
   "dependencies": {
     "exif": "^0.6.0",
     "kopparmora-xmp-reader": "^1.0.1",
-    "node-iptc": "^1.0.5",
-    "q": "^1.5.1"
+    "node-iptc": "^1.0.5"
   },
   "devDependencies": {
     "mocha": "^4.0.1"
