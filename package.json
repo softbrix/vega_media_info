@@ -4,6 +4,7 @@
   "description": "An image and video meta data extracter/updater",
   "main": "index.js",
   "scripts": {
+    "pretest": "cp test_data/img1.jpg test_data/fresh.jpg",
     "test": "mocha"
   },
   "repository": {
@@ -25,7 +26,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "exif": "^0.6.0",
-    "exiftool": "0.0.3",
+    "kopparmora-xmp-reader": "^1.0.1",
     "node-iptc": "^1.0.5",
     "q": "^1.5.1"
   },
