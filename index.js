@@ -77,7 +77,7 @@ var processImageBuffer = function(buffer) {
         Tags : xmpData.keywords || iptc.keywords || [],
         Regions: regionInfoParser.parse(xmpData),
         Type: 'exifImage',
-        origInfo : Object.assign(exifData, xmpData)
+        Raw : Object.assign(exifData, xmpData, iptc, size)
     };
   });
 };
@@ -111,7 +111,7 @@ var processExifTool = function(fileName, tags) {
             Tags : extractTags(metadata),
             Regions: metadata.regionInfo,
             Type: 'exifTool',
-            origInfo : metadata
+            Raw : metadata
         });
       }
     });
@@ -131,7 +131,7 @@ var fileSystemFallback = function(fileName) {
             ModifyDate : stats.mtime,
             Tags: [],
             Type: 'system',
-            origInfo : stats
+            Raw : stats
         });
       }
     });

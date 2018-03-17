@@ -178,7 +178,7 @@ describe('Vega Media Info', function() {
   xit('should be fast', function() {
     var file = jpg_file;
     var count = 0;
-    const LIMIT = 100;
+    const LIMIT = 400;
 
     return new Promise(function(resolve, reject) {
       var process = function() {

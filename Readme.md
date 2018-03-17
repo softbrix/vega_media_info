@@ -20,7 +20,7 @@ Calling the readMediaInfo method will return the following information about a f
   Regions: [Face/Focus region information],
   Tags: [Image keywords and tags from different meta containers],
   Type: 'exifImage',
-  origInfo: [Full file info]
+  Raw: [Full file meta info]
 }
 ## Tags
 
