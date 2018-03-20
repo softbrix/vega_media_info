@@ -69,6 +69,8 @@ var processImageBuffer = function(buffer) {
       jpgSize(buffer)]
     ).then(result => {
     var [exifData, xmpData, iptc, size] = result;
+    size = size || {};
+    iptc = iptc || {};
     return {
         CreateDate : normalizeDate(exifData.exif.CreateDate),
         ModifyDate : normalizeDate(exifData.image.ModifyDate),
