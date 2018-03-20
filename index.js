@@ -47,8 +47,15 @@ var normalizeDate = function(date) {
   return date;
 };
 
+let fileToBuffer = (file) => new Promise((resolve, reject) => {
+	fs.readFile(file, (err, data) => {
+	  if (err) return reject(err);
+	  resolve(data);
+	});
+});
+
 var processExifImage = function(sourceFile) {
-  return xmpReader.fileToBuffer(sourceFile).then(processImageBuffer);
+  return fileToBuffer(sourceFile).then(processImageBuffer);
 };
 
 var exifImage = function(buffer) {
