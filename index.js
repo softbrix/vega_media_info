@@ -109,12 +109,19 @@ var processExifTool = function(fileName, tags) {
         if(createDate === undefined) {
           createDate = metadata['date/timeOriginal'];
         }
+        if(createDate === undefined || createDate === '0000:00:00 00:00:00') {
+          createDate = metadata['fileModificationDate/Time'];
+        }
+        var modifyDate = metadata.modifyDate;
+        if(modifyDate === undefined || modifyDate === '0000:00:00 00:00:00') {
+          modifyDate = createDate;
+        }
 
         metadata.regionInfo = regionInfoParser.parse(metadata);
 
         resolve({
             CreateDate : normalizeDate(createDate),
-            ModifyDate : normalizeDate(metadata.modifyDate),
+            ModifyDate : normalizeDate(modifyDate),
             Width: metadata.imageWidth,
             Height: metadata.imageHeight,
             Tags : extractTags(metadata),
