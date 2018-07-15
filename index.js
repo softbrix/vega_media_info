@@ -182,7 +182,7 @@ module.exports = {
         if(isImage(filePath)) {
           // Exif image is much faster but only supports jpeg
           return processExifImage(filePath);
-        } else {
+        } else if (useFallback) {
           // Exiftool is an external dependency and needs to be installed on the system
           return processExifTool(filePath);
         }
