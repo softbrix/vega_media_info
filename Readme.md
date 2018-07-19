@@ -26,9 +26,9 @@ Calling the readMediaInfo method will return the following information about a f
 
 This utility provides CRD methods to update the tags in a media file.
 
-addTag - Add a new tag to a file
-removeTag - Remove a tag from a file
-getTags - Return a list with tags for a file
+- addTag - Add a new tag to a file
+- removeTag - Remove a tag from a file
+- getTags - Return a list with tags for a file
 
 ## External dependencies
 
