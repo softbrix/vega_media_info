@@ -26,7 +26,7 @@ describe('Vega Media Info', function () {
         .then(function (info) {
           assert.ok(info);
           assert.equal(info.CreateDate, info.ModifyDate);
-          // This size is stored in the exif information, but the actual image is smaller
+          // This size is stored in the exif information is wrong, the actual image is smaller, should have looked at the canvas
           assert.equal(info.Width, 480);
           assert.equal(info.Height, 360);
           assert.equal(info.Type, 'exifImage');
@@ -163,9 +163,19 @@ describe('Vega Media Info', function () {
       mediaInfo._processExifTool(file)
       // mediaInfo._processFileSystem(file)
     ]).then(([a, b]) => {
-      assert.equal(a.CreateDate, b.CreateDate);
-      assert.equal(a.Width, b.Width);
-      assert.equal(a.Height, b.Height);
+      let eqFields = [
+        'CreateDate',
+        'Width',
+        'Height',
+        'CameraBrand',
+        'CameraModel',
+        'Orientation',
+        'Flash',
+        'UserRating'
+      ];
+      eqFields.forEach(field => {
+        assert.equal(a[field], b[field], field);
+      });
       assert.deepEqual(a.Tags, b.Tags);
       assert.deepEqual(a.Regions, b.Regions);
     });

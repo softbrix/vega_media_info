@@ -4,13 +4,18 @@
 var fs = require('fs');
 var path = require('path');
 
+const metaReader = require('hemmesta-jpeg-meta'); // This will extract meta blocks from JPEG
 const ExifImage = require('exif').ExifImage; // This will read exif info
 const iptc = require('node-iptc'); // This will only return the keywords tag
 const xmpReader = require('kopparmora-xmp-reader'); // This will read xmp info
 const jpgSize = require('./lib/jpgSize'); // This will read xmp info
 
-const exif = require('./exiftool');
+const exiftool = require('./lib/exiftool');
 const regionInfoParser = require('./lib/regionInfo');
+
+// First two bytes which defines a jpg
+const JPG_HEADER_BUFFER = Buffer.from([0xFF, 0xD8]);
+const IPTC_BLOCK_MARKER = '237'; // 0xED
 
 // Allways itpc:keywords
 const tagHolderItpc = 'keywords';
@@ -47,19 +52,6 @@ var normalizeDate = function (date) {
   return date;
 };
 
-let fileToBuffer = (file) => new Promise((resolve, reject) => {
-  fs.readFile(file, (err, data) => {
-    if (err) {
-      return reject(err);
-    }
-    resolve(data);
-  });
-});
-
-var processExifImage = function (sourceFile) {
-  return fileToBuffer(sourceFile).then(processImageBuffer);
-};
-
 var exifImage = function (buffer) {
   return new Promise((resolve, reject) => {
     ExifImage(buffer, function (error, exifData) {
@@ -69,37 +61,93 @@ var exifImage = function (buffer) {
   });
 };
 
-var processImageBuffer = function (buffer) {
-  // Different tools will read different meta information
-  return Promise.all([
-    exifImage(buffer),
-    xmpReader.fromBuffer(buffer),
-    iptc(buffer),
-    jpgSize(buffer)]
-  ).then(result => {
-    var [exifData, xmpData, iptc, size] = result;
-    size = size || {};
-    iptc = iptc || {};
+function getExifBuffer (blocks) {
+  if (blocks.Exif) {
+    return Buffer.concat([JPG_HEADER_BUFFER, blocks.Exif]);
+  }
+  return JPG_HEADER_BUFFER;
+}
+
+function getXMPBuffer (blocks) {
+  let key = Object.keys(blocks).find((x) => x.startsWith('http://ns.adobe.com/xap/1'));
+  if (key) {
+    return blocks[key];
+  }
+  return JPG_HEADER_BUFFER;
+}
+
+function getIPTCBuffer (blocks) {
+  if (blocks[IPTC_BLOCK_MARKER]) {
+    return Buffer.concat([JPG_HEADER_BUFFER, blocks[IPTC_BLOCK_MARKER]]);
+  }
+  return JPG_HEADER_BUFFER;
+}
+
+function extractExifThumbnail (exifInfo, exifBuffer) {
+  if (exifInfo.thumbnail) {
+    let tData = exifInfo.thumbnail;
+    // Offset and skip first 0xFF 0xD8
+    let start = exifBuffer.indexOf(0xD8, tData.ThumbnailOffset + 2) - 1;
+    let end = start + tData.ThumbnailLength;
+
+    let thumbnailBuffer = exifBuffer.slice(start, end);
+
     return {
-      CreateDate: normalizeDate(exifData.exif.CreateDate),
-      ModifyDate: normalizeDate(exifData.image.ModifyDate),
-      Width: size.width || exifData.image.ImageWidth || exifData.exif.ExifImageWidth,
-      Height: size.height || exifData.image.ImageHeight || exifData.exif.ExifImageHeight,
-      Tags: xmpData.keywords || iptc.keywords || [],
-      Regions: regionInfoParser.parse(xmpData),
-      Type: 'exifImage',
-      Raw: Object.assign(exifData, xmpData, iptc, size)
+      width: tData.XResolution,
+      height: tData.YResolution,
+      buffer: thumbnailBuffer
     };
-  });
+  }
+}
+
+var processExifImage = async function (sourceFile) {
+  try {
+    let metaBlocks = await metaReader(sourceFile);
+    if (!metaBlocks) {
+      console.log('No result');
+      return {};
+    }
+    // Different tools will read different meta information
+    var exifBuffer = getExifBuffer(metaBlocks);
+    return Promise.all([
+      exifImage(exifBuffer),
+      xmpReader.fromBuffer(getXMPBuffer(metaBlocks)),
+      iptc(getIPTCBuffer(metaBlocks)),
+      jpgSize(metaBlocks)]
+    ).then(result => {
+      var [exifData, xmpData, iptc, size] = result;
+      size = size || {};
+      iptc = iptc || {};
+      return {
+        CreateDate: normalizeDate(exifData.exif.CreateDate),
+        ModifyDate: normalizeDate(exifData.image.ModifyDate),
+        Width: size.width || exifData.image.ImageWidth || exifData.exif.ExifImageWidth,
+        Height: size.height || exifData.image.ImageHeight || exifData.exif.ExifImageHeight,
+        Tags: xmpData.keywords || iptc.keywords || [],
+        Regions: regionInfoParser.parse(xmpData),
+        // FileSize: buffer.length,
+        CameraBrand: exifData.image.Make,
+        CameraModel: exifData.image.Model,
+        Orientation: exifData.image.Orientation,
+        Flash: exifData.exif.Flash,
+        UserRating: xmpData.rating,
+        Thumbnail: extractExifThumbnail(exifData, exifBuffer),
+        Type: 'exifImage',
+        Raw: Object.assign(exifData, xmpData, iptc, size)
+      };
+    });
+  } catch (ex) {
+    throw ex;
+  }
 };
 
-var processExifTool = function (fileName, tags) {
-  if (tags === undefined) {
-    tags = [];
+var processExifTool = function (fileName, args) {
+  if (args === undefined) {
+    args = ['-n'];
   }
   return new Promise((resolve, reject) => {
     /** exiftool: */
-    exif.metadata(fileName, tags, function (error, metadata) {
+    exiftool.metadata(fileName, args, function (error, metadata) {
       if (error) {
         return reject(error);
       } else {
@@ -128,6 +176,12 @@ var processExifTool = function (fileName, tags) {
           Height: metadata.imageHeight,
           Tags: extractTags(metadata),
           Regions: metadata.regionInfo,
+          FileSize: metadata.fileSize,
+          CameraBrand: metadata.make,
+          CameraModel: metadata.cameraModelName,
+          Orientation: metadata.orientation,
+          Flash: metadata.flash,
+          UserRating: metadata.rating,
           Type: 'exifTool',
           Raw: metadata
         });
