@@ -135,6 +135,8 @@ var processExifImage = async function (sourceFile) {
         Type: 'exifImage',
         Raw: Object.assign(exifData, xmpData, iptc, size)
       };
+    }, ex => {
+      throw new Error('Error while processing file: ' + sourceFile + ':' + ex);
     });
   } catch (ex) {
     throw ex;
@@ -237,7 +239,11 @@ module.exports = {
     if (hasExifInfo(filePath)) {
       if (isImage(filePath)) {
         // Exif image is much faster but only supports jpeg
-        return processExifImage(filePath);
+        return processExifImage(filePath).catch(ex => {
+          if (useFallback) {
+            return processExifTool(filePath);
+          }
+        });
       } else if (useFallback) {
         // Exiftool is an external dependency and needs to be installed on the system
         return processExifTool(filePath);
