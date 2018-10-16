@@ -9,7 +9,7 @@ const ExifImage = require('exif').ExifImage; // This will read exif info
 const iptc = require('node-iptc'); // This will only return the keywords tag
 const xmpReader = require('kopparmora-xmp-reader'); // This will read xmp info
 const jpgSize = require('./lib/jpgSize'); // This will read xmp info
-
+const mp4Info = require('./lib/mp4info');
 const exiftool = require('./lib/exiftool');
 const regionInfoParser = require('./lib/regionInfo');
 
@@ -20,6 +20,7 @@ const IPTC_BLOCK_MARKER = '237'; // 0xED
 // Allways itpc:keywords
 const tagHolderItpc = 'keywords';
 const tagsDelimiter = ';';
+const isMp4Regexp = /((m)pe?g|m4a|m4v|mp4|mov)$/i;
 const exifRegexp = /((j|m)pe?g|m4a|m4v|mp4|mov|avi)$/i;
 const isImageRegexp = /(jpe?g|png|tiff|img)$/i;
 
@@ -29,6 +30,10 @@ function isImage (filePath) {
 
 function hasExifInfo (filePath) {
   return exifRegexp.test(path.basename(filePath));
+}
+
+function isMp4Video (filePath) {
+  return isMp4Regexp.test(path.basename(filePath));
 }
 
 function isNumeric (n) {
@@ -192,6 +197,40 @@ var processExifTool = function (fileName, args) {
   });
 };
 
+var processMp4Info = function (fileName) {
+  return new Promise((resolve, reject) => {
+    /** exiftool: */
+    mp4Info.info(fileName, function (error, metadata) {
+      if (error) {
+        return reject(error);
+      } else {
+        if (Object.keys(metadata).length === 0) {
+          return resolve({});
+        }
+
+        let videoTrack = (metadata.tracks || []).find(t => t.track_width > 0);
+
+        resolve({
+          CreateDate: normalizeDate(metadata.created),
+          ModifyDate: normalizeDate(metadata.modified),
+          Width: videoTrack.track_width,
+          Height: videoTrack.track_height,
+          Tags: metadata.brands,
+          Regions: undefined,
+          FileSize: metadata.fileSize,
+          CameraBrand: undefined,
+          CameraModel: undefined,
+          Orientation: undefined,
+          Flash: undefined,
+          UserRating: undefined,
+          Type: 'mp4',
+          Raw: metadata
+        });
+      }
+    });
+  });
+};
+
 // This should be the suggested date, more insecure than the exif info
 var fileSystemFallback = function (fileName) {
   return new Promise((resolve, reject) => {
@@ -237,18 +276,23 @@ var extractTags = function (metadata) {
 module.exports = {
   readMediaInfo: function (filePath, useFallback) {
     if (hasExifInfo(filePath)) {
+      let fallback = () => { return Promise.reject(new Error('Failed to parse file: ' + filePath)); };
+      if (useFallback) {
+        fallback = () => { return processExifTool(filePath); };
+      }
       if (isImage(filePath)) {
         // Exif image is much faster but only supports jpeg
         return processExifImage(filePath).catch(ex => {
-          if (useFallback) {
-            return processExifTool(filePath);
-          }
+          return fallback();
         });
-      } else if (useFallback) {
-        // Exiftool is an external dependency and needs to be installed on the system
-        return processExifTool(filePath);
+      } else if (isMp4Video(filePath)) {
+        // File info from mp4 box
+        return processMp4Info(filePath).catch(ex => {
+          return fallback();
+        });
       }
-    } else if (useFallback) {
+    }
+    if (useFallback) {
       return fileSystemFallback(filePath);
     }
     var extension = path.extname(filePath);

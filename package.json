@@ -30,6 +30,7 @@
     "exif": "^0.6.0",
     "hemmesta-jpeg-meta": "^1.2.0",
     "kopparmora-xmp-reader": "^1.1.0",
+    "mp4box": "^0.3.15",
     "node-iptc": "^1.0.5"
   },
   "devDependencies": {
