@@ -29,6 +29,7 @@ describe('Vega Media Info', function () {
           // This size is stored in the exif information is wrong, the actual image is smaller, should have looked at the canvas
           assert.equal(info.Width, 480);
           assert.equal(info.Height, 360);
+          assert.equal(info.Mime, 'image/jpeg');
           assert.equal(info.Type, 'exifImage');
 
           assert.ok(new Date(info.CreateDate));
@@ -43,6 +44,7 @@ describe('Vega Media Info', function () {
           assert.equal(info.ModifyDate, new Date(1483833472653).toLocaleString());
           assert.equal(info.Width, 3660);
           assert.equal(info.Height, 10194);
+          assert.equal(info.Mime, 'image/jpeg');
           assert.equal(info.Type, 'exifImage');
         });
     });
@@ -54,6 +56,7 @@ describe('Vega Media Info', function () {
           assert.equal(info.CreateDate, info.ModifyDate);
           assert.equal(info.Width, 1920);
           assert.equal(info.Height, 1080);
+          assert.equal(info.Mime, 'video/quicktime');
           assert.equal(info.Type, 'exifTool');
 
           assert.ok(new Date(info.CreateDate));

@@ -137,6 +137,7 @@ var processExifImage = async function (sourceFile) {
         Flash: exifData.exif.Flash,
         UserRating: xmpData.rating,
         Thumbnail: extractExifThumbnail(exifData, exifBuffer),
+        Mime: 'image/jpeg',
         Type: 'exifImage',
         Raw: Object.assign(exifData, xmpData, iptc, size)
       };
@@ -189,6 +190,7 @@ var processExifTool = function (fileName, args) {
           Orientation: metadata.orientation,
           Flash: metadata.flash,
           UserRating: metadata.rating,
+          Mime: metadata.mimeType,
           Type: 'exifTool',
           Raw: metadata
         });
@@ -223,6 +225,7 @@ var processMp4Info = function (fileName) {
           Orientation: undefined,
           Flash: undefined,
           UserRating: undefined,
+          Mime: 'video/mp4',
           Type: 'mp4',
           Raw: metadata
         });
@@ -242,6 +245,7 @@ var fileSystemFallback = function (fileName) {
           CreateDate: stats.ctime,
           ModifyDate: stats.mtime,
           Tags: [],
+          Mime: 'file',
           Type: 'system',
           Raw: stats
         });
