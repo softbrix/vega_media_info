@@ -31,6 +31,9 @@ describe('Vega Media Info', function () {
           assert.equal(info.Height, 360);
           assert.equal(info.Mime, 'image/jpeg');
           assert.equal(info.Type, 'exifImage');
+          let thumb = mediaInfo.getEncodedThumbnail(info);
+          assert.equal(thumb.startsWith('data:image/jpeg;base64,/9j/2wCEAAkGBggGBQkIBwgKCQkLDRYPDQwMDRwTFRAW'), true);
+          assert.equal(thumb.length, 7287);
 
           assert.ok(new Date(info.CreateDate));
         });
@@ -58,6 +61,7 @@ describe('Vega Media Info', function () {
           assert.equal(info.Height, 1080);
           assert.equal(info.Mime, 'video/quicktime');
           assert.equal(info.Type, 'exifTool');
+          assert.equal(info.Thumnail, undefined);
 
           assert.ok(new Date(info.CreateDate));
         });
@@ -184,10 +188,14 @@ describe('Vega Media Info', function () {
     });
   });
 
-  xit('should be fast', function () {
+  it('should handle undefined thumbnail', function () {
+    assert.equal(mediaInfo.getEncodedThumbnail({}, undefined));
+  });
+
+  it('should be fast', function () {
     var file = jpgFile;
     var count = 0;
-    const LIMIT = 400;
+    const LIMIT = 100;
 
     return new Promise(function (resolve, reject) {
       var process = function () {

@@ -364,6 +364,13 @@ module.exports = {
       return processExifTool(sourceFile, args);
     });
   },
+  /** Get the thumbnail as an base64 encoded image from an extracted meta data object */
+  getEncodedThumbnail: function (mediaInfo) {
+    if (mediaInfo && mediaInfo.Thumbnail && mediaInfo.Thumbnail.buffer) {
+      return 'data:image/jpeg;base64,' + mediaInfo.Thumbnail.buffer.toString('base64');
+    }
+    return undefined;
+  },
 
   /** Internal methods used for testing **/
   _processExifImage: processExifImage,
