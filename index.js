@@ -100,7 +100,10 @@ function extractExifThumbnail (exifInfo, exifBuffer) {
     return {
       width: tData.XResolution,
       height: tData.YResolution,
-      buffer: thumbnailBuffer
+      buffer: thumbnailBuffer,
+      base64: function () {
+        return 'data:image/jpeg;base64,' + thumbnailBuffer.toString('base64');
+      }
     };
   }
 }
@@ -366,8 +369,8 @@ module.exports = {
   },
   /** Get the thumbnail as an base64 encoded image from an extracted meta data object */
   getEncodedThumbnail: function (mediaInfo) {
-    if (mediaInfo && mediaInfo.Thumbnail && mediaInfo.Thumbnail.buffer) {
-      return 'data:image/jpeg;base64,' + mediaInfo.Thumbnail.buffer.toString('base64');
+    if (mediaInfo && mediaInfo.Thumbnail) {
+      return mediaInfo.Thumbnail.base64();
     }
     return undefined;
   },
