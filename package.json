@@ -34,7 +34,7 @@
     "node-iptc": "^1.0.5"
   },
   "devDependencies": {
-    "babel-eslint": "8.2.6",
+    "babel-eslint": "10.0.1",
     "eslint": "4.19.1",
     "eslint-config-standard": "10.2.1",
     "eslint-friendly-formatter": "3.0.0",
