@@ -110,47 +110,41 @@ function extractExifThumbnail (exifInfo, exifBuffer) {
 }
 
 var processExifImage = async function (sourceFile) {
-  try {
-    let metaBlocks = await metaReader(sourceFile);
-    if (!metaBlocks) {
-      console.log('No result');
-      return {};
-    }
-    // Different tools will read different meta information
-    var exifBuffer = getExifBuffer(metaBlocks);
-    return Promise.all([
-      exifImage(exifBuffer),
-      xmpReader.fromBuffer(getXMPBuffer(metaBlocks)),
-      iptc(getIPTCBuffer(metaBlocks)),
-      jpgSize(metaBlocks)]
-    ).then(result => {
-      var [exifData, xmpData, iptc, size] = result;
-      size = size || {};
-      iptc = iptc || {};
-      return {
-        CreateDate: normalizeDate(exifData.exif.CreateDate),
-        ModifyDate: normalizeDate(exifData.image.ModifyDate),
-        Width: size.width || exifData.image.ImageWidth || exifData.exif.ExifImageWidth,
-        Height: size.height || exifData.image.ImageHeight || exifData.exif.ExifImageHeight,
-        Tags: xmpData.keywords || iptc.keywords || [],
-        Regions: regionInfoParser.parse(xmpData),
-        // FileSize: buffer.length,
-        CameraBrand: exifData.image.Make,
-        CameraModel: exifData.image.Model,
-        Orientation: exifData.image.Orientation,
-        Flash: exifData.exif.Flash,
-        UserRating: xmpData.rating,
-        Thumbnail: extractExifThumbnail(exifData, exifBuffer),
-        Mime: 'image/jpeg',
-        Type: 'exifImage',
-        Raw: Object.assign(exifData, xmpData, iptc, size)
-      };
-    }, ex => {
-      throw new Error('Error while processing file: ' + sourceFile + ':' + ex);
-    });
-  } catch (ex) {
-    throw ex;
+  let metaBlocks = await metaReader(sourceFile);
+  if (!metaBlocks) {
+    console.log('No result');
+    return {};
   }
+  // Different tools will read different meta information
+  var exifBuffer = getExifBuffer(metaBlocks);
+  return Promise.all([
+    exifImage(exifBuffer),
+    xmpReader.fromBuffer(getXMPBuffer(metaBlocks)),
+    iptc(getIPTCBuffer(metaBlocks)),
+    jpgSize(metaBlocks)]
+  ).then(result => {
+    var [exifData, xmpData, iptc, size] = result;
+    size = size || {};
+    iptc = iptc || {};
+    return {
+      CreateDate: normalizeDate(exifData.exif.CreateDate),
+      ModifyDate: normalizeDate(exifData.image.ModifyDate),
+      Width: size.width || exifData.image.ImageWidth || exifData.exif.ExifImageWidth,
+      Height: size.height || exifData.image.ImageHeight || exifData.exif.ExifImageHeight,
+      Tags: xmpData.keywords || iptc.keywords || [],
+      Regions: regionInfoParser.parse(xmpData),
+      // FileSize: buffer.length,
+      CameraBrand: exifData.image.Make,
+      CameraModel: exifData.image.Model,
+      Orientation: exifData.image.Orientation,
+      Flash: exifData.exif.Flash,
+      UserRating: xmpData.rating,
+      Thumbnail: extractExifThumbnail(exifData, exifBuffer),
+      Mime: 'image/jpeg',
+      Type: 'exifImage',
+      Raw: Object.assign(exifData, xmpData, iptc, size)
+    };
+  });
 };
 
 var processExifTool = function (fileName, args) {
@@ -288,19 +282,19 @@ var extractTags = function (metadata) {
 module.exports = {
   readMediaInfo: function (filePath, useFallback) {
     if (hasExifInfo(filePath)) {
-      let fallback = () => { return Promise.reject(new Error('Failed to parse file: ' + filePath)); };
+      let fallback = (ex) => { console.log(ex); return Promise.reject(new Error('Failed to parse file: ' + filePath)); };
       if (useFallback) {
         fallback = () => { return processExifTool(filePath); };
       }
       if (isImage(filePath)) {
         // Exif image is much faster but only supports jpeg
         return processExifImage(filePath).catch(ex => {
-          return fallback();
+          return fallback(ex);
         });
       } else if (isMp4Video(filePath)) {
         // File info from mp4 box
         return processMp4Info(filePath).catch(ex => {
-          return fallback();
+          return fallback(ex);
         });
       }
     }
@@ -312,37 +306,34 @@ module.exports = {
   },
 
   // CRUD Tags
-  addTag: function (sourceFile, newTag) {
-    return this.getTags(sourceFile).then(
-      function (tags) {
-        var tagCountStart = tags.length;
-        if (Array.isArray(newTag)) {
-          newTag.forEach(function (tag) {
-            if (tags.indexOf(tag) < 0) {
-              tags.push(tag);
-            }
-          });
-        } else if (tags.indexOf(newTag) < 0) {
-          tags.push(newTag);
-        }
-        if (tagCountStart !== tags.length) {
-          return saveTagsToFile(tags, sourceFile);
+  addTag: async function (sourceFile, newTag) {
+    let tags = await this.getTags(sourceFile);
+    var tagCountStart = tags.length;
+    if (Array.isArray(newTag)) {
+      newTag.forEach(function (tag) {
+        if (tags.indexOf(tag) < 0) {
+          tags.push(tag);
         }
       });
+    } else if (tags.indexOf(newTag) < 0) {
+      tags.push(newTag);
+    }
+    if (tagCountStart !== tags.length) {
+      return saveTagsToFile(tags, sourceFile);
+    }
   },
-  removeTag: function (sourceFile, newTag) {
-    return this.getTags(sourceFile).then(
-      function (tags) {
-        if (tags.indexOf(newTag) >= 0) {
-          tags = tags.filter(
-            tag => tag.valueOf() !== '' && tag.valueOf() !== newTag.valueOf()
-          );
-          return saveTagsToFile(tags, sourceFile);
-        }
-      });
+  removeTag: async function (sourceFile, newTag) {
+    let tags = await this.getTags(sourceFile);
+    if (tags.indexOf(newTag) >= 0) {
+      tags = tags.filter(
+        tag => tag.valueOf() !== '' && tag.valueOf() !== newTag.valueOf()
+      );
+      return saveTagsToFile(tags, sourceFile);
+    }
   },
-  getTags: function (sourceFile) {
-    return this.readMediaInfo(sourceFile).then(info => info.Tags);
+  getTags: async function (sourceFile) {
+    let info = await this.readMediaInfo(sourceFile);
+    return info.Tags;
   },
   /*
   https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/MWG.html#RegionStruct

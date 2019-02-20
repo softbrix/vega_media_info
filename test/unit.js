@@ -182,7 +182,7 @@ describe('Vega Media Info', function () {
         await mediaInfo.setRating(noFile, 4);
         assert.fail('Expected an error');
       } catch (ex) {
-        assert.ok(ex.message.startsWith('Invalid input,'));
+        assert.ok(ex.startsWith('No file specified'));
       }
     });
   });
