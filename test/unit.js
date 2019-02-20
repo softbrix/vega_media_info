@@ -1,15 +1,19 @@
 
 const assert = require('assert');
+const fs = require('fs');
 const mediaInfo = require('../index.js');
 
 describe('Vega Media Info', function () {
   var jpgFile = './test_data/img1.jpg';
+  var jpgFileCopy = './test_data/img1_cpy.jpg';
   var jpgTimeFile = './test_data/timestamp.jpg';
   var movFile = './test_data/test.mov';
   var noExifFile = './test_data/file.txt';
   var noFile = './test_data/no_file.jpg';
   var corruptFile = './test_data/corrupt.jpg';
   var fresh = './test_data/fresh.jpg';
+
+  fs.copyFileSync(jpgFile, jpgFileCopy);
 
   describe('readMediaInfo', function () {
     it('should reject if failed to parse image', function () {
@@ -146,6 +150,40 @@ describe('Vega Media Info', function () {
         })
         .then(() => { return mediaInfo.readMediaInfo(fresh); })
         .then(info => assert.equal(1, info.Regions.regionList.length));
+    });
+  });
+
+  describe('rating', () => {
+    it('should return rating for simple .JPG image', async function () {
+      var info = await mediaInfo.readMediaInfo(jpgFileCopy);
+      assert.equal(info.UserRating, undefined);
+    });
+
+    it('should set rating for simple .JPG image', async function () {
+      let newRating = 4;
+      var info = await mediaInfo.setRating(jpgFileCopy, newRating);
+      console.log(info)
+      // assert.equal(info.UserRating, newRating);
+      info = await mediaInfo.readMediaInfo(jpgFileCopy);
+      assert.equal(info.UserRating, newRating);
+    });
+
+    it('should report error if input is not a floating number', async function () {
+      try {
+        await mediaInfo.setRating(jpgFileCopy, 'abc');
+        assert.fail('Expected an error');
+      } catch (ex) {
+        assert.ok(ex.message.startsWith('Invalid input,'));
+      }
+    });
+
+    it('should report error if input is not found', async function () {
+      try {
+        await mediaInfo.setRating(noFile, 4);
+        assert.fail('Expected an error');
+      } catch (ex) {
+        assert.ok(ex.message.startsWith('Invalid input,'));
+      }
     });
   });
 

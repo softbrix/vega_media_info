@@ -19,6 +19,7 @@ const IPTC_BLOCK_MARKER = '237'; // 0xED
 
 // Allways itpc:keywords
 const tagHolderItpc = 'keywords';
+const ratingHolderXmp = 'xmp:Rating';
 const tagsDelimiter = ';';
 const isMp4Regexp = /((m)pe?g|m4a|m4v|mp4|mov)$/i;
 const exifRegexp = /((j|m)pe?g|m4a|m4v|mp4|mov|avi)$/i;
@@ -259,7 +260,11 @@ var fileSystemFallback = function (fileName) {
 
 var saveTagsToFile = function (tags, sourceFile) {
   var newTagStr = tags.length > 0 ? tags.join(tagsDelimiter) : '';
-  return processExifTool(sourceFile, ['-' + tagHolderItpc + '=' + newTagStr, '-overwrite_original']);
+  /**
+   * -P for preserving the file modification date/time 
+   * -overwrite_original will overwrite the sourceFile
+  */
+  return processExifTool(sourceFile, ['-P', '-' + tagHolderItpc + '=' + newTagStr, '-overwrite_original']);
 };
 
 var prepareExifToolArgs = function (obj, operator) {
@@ -374,7 +379,13 @@ module.exports = {
     }
     return undefined;
   },
-
+  /** Set the image rating with exif tool */
+  setRating: function (sourceFile, newRating) {
+    if (!isNumeric(newRating) || newRating < -1 || newRating > 5) {
+      return Promise.reject(new Error('Invalid input, expecting a floating point number between -1 and 5'));
+    }
+    return processExifTool(sourceFile, ['-P', '-' + ratingHolderXmp + '=' + newRating, '-overwrite_original']);
+  },
   /** Internal methods used for testing **/
   _processExifImage: processExifImage,
   _processExifTool: processExifTool,
