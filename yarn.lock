@@ -160,10 +160,6 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
 
-bluebird@^3.5.1:
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
-
 brace-expansion@^1.1.7:
   version "1.1.8"
   resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.8.tgz#c07b211c7c952ec1f8efd51a77ef0d1d3990a292"
@@ -416,9 +412,9 @@ eslint-plugin-node@5.2.1:
     resolve "^1.3.3"
     semver "5.3.0"
 
-eslint-plugin-promise@3.8.0:
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-promise/-/eslint-plugin-promise-3.8.0.tgz#65ebf27a845e3c1e9d6f6a5622ddd3801694b621"
+eslint-plugin-promise@4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-promise/-/eslint-plugin-promise-4.1.1.tgz#1e08cb68b5b2cd8839f8d5864c796f56d82746db"
 
 eslint-plugin-standard@3.1.0:
   version "3.1.0"
@@ -515,10 +511,6 @@ estraverse@^4.0.0, estraverse@^4.1.0, estraverse@^4.1.1:
 esutils@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.2.tgz#0abf4f1caa5bcb1f7a9d8acc6dea4faaa04bac9b"
-
-exif-reader@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/exif-reader/-/exif-reader-1.0.2.tgz#02408b97b61028ea4f45e5b893a836f9aa28ac4f"
 
 exif@^0.6.0:
   version "0.6.0"
@@ -648,9 +640,9 @@ he@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
 
-hemmesta-jpeg-meta@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/hemmesta-jpeg-meta/-/hemmesta-jpeg-meta-1.2.0.tgz#454e2f8aa8d21641878cf751fc4f54522174aa81"
+hemmesta-jpeg-meta@1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/hemmesta-jpeg-meta/-/hemmesta-jpeg-meta-1.3.1.tgz#dd2ea95f8eff4b348b00cd0816b8eee90384f144"
 
 hosted-git-info@^2.1.4:
   version "2.7.1"
@@ -768,12 +760,10 @@ json-stable-stringify-without-jsonify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz#9db7b59496ad3f3cfef30a75142d2d930ad72651"
 
-kopparmora-xmp-reader@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/kopparmora-xmp-reader/-/kopparmora-xmp-reader-1.1.1.tgz#d1fd074f1bd15655dd15f203c5b5ec469b58879b"
+kopparmora-xmp-reader@1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/kopparmora-xmp-reader/-/kopparmora-xmp-reader-1.1.2.tgz#290099fdfef9d561e1819c493c8fb423b077b75e"
   dependencies:
-    bluebird "^3.5.1"
-    exif-reader "^1.0.2"
     sax "^1.2.1"
 
 levn@^0.3.0, levn@~0.3.0:
