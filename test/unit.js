@@ -226,7 +226,7 @@ describe('Vega Media Info', function () {
   });
 
   it('should handle undefined thumbnail', function () {
-    assert.equal(mediaInfo.getEncodedThumbnail({}, undefined));
+    assert.equal(mediaInfo.getEncodedThumbnail({}), undefined);
   });
 
   it('should be fast', function () {
