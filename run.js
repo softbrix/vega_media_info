@@ -10,7 +10,7 @@ if (process.argv.length < 3) {
 var sourceFile = process.argv[2];
 
 try {
-  mediaInfo.readMediaInfo(sourceFile, true).then((info) => {
+  mediaInfo.readMediaInfo(sourceFile, false).then((info) => {
     if (info && info.Thumbnail) {
       fs.writeFileSync('thumbnail.jpg', info.Thumbnail.buffer);
     }

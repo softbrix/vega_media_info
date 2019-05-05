@@ -51,9 +51,10 @@ var normalizeDate = function (date) {
     if (d.length > 3) {
       return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6], 0).toLocaleString();
     }
-  }
-  if (isNumeric(date)) {
+  } else if (isNumeric(date)) {
     return new Date(parseFloat(date)).toLocaleString();
+  } else if (date !== undefined && date.toLocaleString !== undefined) {
+    return date.toLocaleString();
   }
   return date;
 };
@@ -121,9 +122,10 @@ var processExifImage = async function (sourceFile) {
     exifImage(exifBuffer),
     xmpReader.fromBuffer(getXMPBuffer(metaBlocks)),
     iptc(getIPTCBuffer(metaBlocks)),
-    jpgSize(metaBlocks)]
+    jpgSize(metaBlocks),
+    fileSystemFallback(sourceFile)]
   ).then(result => {
-    var [exifData, xmpData, iptc, size] = result;
+    var [exifData, xmpData, iptc, size, fStat] = result;
     size = size || {};
     iptc = iptc || {};
     return {
@@ -133,7 +135,7 @@ var processExifImage = async function (sourceFile) {
       Height: size.height || exifData.image.ImageHeight || exifData.exif.ExifImageHeight,
       Tags: xmpData.keywords || iptc.keywords || [],
       Regions: regionInfoParser.parse(xmpData),
-      // FileSize: buffer.length,
+      FileSize: fStat.FileSize,
       CameraBrand: exifData.image.Make,
       CameraModel: exifData.image.Model,
       Orientation: exifData.image.Orientation,
@@ -199,7 +201,8 @@ var processExifTool = function (fileName, args) {
 
 var processMp4Info = function (fileName) {
   return new Promise((resolve, reject) => {
-    /** exiftool: */
+    var fileInfoPromise = fileSystemFallback(fileName);
+    /** mp4box: */
     mp4Info.info(fileName, function (error, metadata) {
       if (error) {
         return reject(error);
@@ -210,22 +213,24 @@ var processMp4Info = function (fileName) {
 
         let videoTrack = (metadata.tracks || []).find(t => t.track_width > 0);
 
-        resolve({
-          CreateDate: normalizeDate(metadata.created),
-          ModifyDate: normalizeDate(metadata.modified),
-          Width: videoTrack.track_width,
-          Height: videoTrack.track_height,
-          Tags: metadata.brands,
-          Regions: undefined,
-          FileSize: metadata.fileSize,
-          CameraBrand: undefined,
-          CameraModel: undefined,
-          Orientation: undefined,
-          Flash: undefined,
-          UserRating: undefined,
-          Mime: 'video/mp4',
-          Type: 'mp4',
-          Raw: metadata
+        fileInfoPromise.then((fileInfo) => {
+          resolve({
+            CreateDate: normalizeDate(metadata.created),
+            ModifyDate: normalizeDate(metadata.modified),
+            FileSize: fileInfo.FileSize,
+            Width: videoTrack.track_width,
+            Height: videoTrack.track_height,
+            Tags: metadata.brands,
+            Regions: undefined,
+            CameraBrand: undefined,
+            CameraModel: undefined,
+            Orientation: undefined,
+            Flash: undefined,
+            UserRating: undefined,
+            Mime: 'video/mp4',
+            Type: 'mp4',
+            Raw: metadata
+          });
         });
       }
     });
@@ -242,6 +247,7 @@ var fileSystemFallback = function (fileName) {
         resolve({
           CreateDate: stats.ctime,
           ModifyDate: stats.mtime,
+          FileSize: stats.size,
           Tags: [],
           Mime: 'file',
           Type: 'system',
@@ -255,7 +261,7 @@ var fileSystemFallback = function (fileName) {
 var saveTagsToFile = function (tags, sourceFile) {
   var newTagStr = tags.length > 0 ? tags.join(tagsDelimiter) : '';
   /**
-   * -P for preserving the file modification date/time 
+   * -P for preserving the file modification date/time
    * -overwrite_original will overwrite the sourceFile
   */
   return processExifTool(sourceFile, ['-P', '-' + tagHolderItpc + '=' + newTagStr, '-overwrite_original']);
@@ -282,8 +288,9 @@ var extractTags = function (metadata) {
 module.exports = {
   readMediaInfo: function (filePath, useFallback) {
     if (hasExifInfo(filePath)) {
-      let fallback = (ex) => { console.log(ex); return Promise.reject(new Error('Failed to parse file: ' + filePath)); };
+      let fallback = (ex) => { return Promise.reject(new Error('Failed to parse file: ' + filePath)); };
       if (useFallback) {
+        // Exiftool as fallback, exiftool is reliable but slower than other alternatives
         fallback = () => { return processExifTool(filePath); };
       }
       if (isImage(filePath)) {

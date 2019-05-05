@@ -63,8 +63,8 @@ describe('Vega Media Info', function () {
           assert.equal(info.CreateDate, info.ModifyDate);
           assert.equal(info.Width, 1920);
           assert.equal(info.Height, 1080);
-          assert.equal(info.Mime, 'video/quicktime');
-          assert.equal(info.Type, 'exifTool');
+          assert.equal(info.Mime, 'video/mp4');
+          assert.equal(info.Type, 'mp4');
           assert.equal(info.Thumnail, undefined);
 
           assert.ok(new Date(info.CreateDate));
@@ -162,7 +162,6 @@ describe('Vega Media Info', function () {
     it('should set rating for simple .JPG image', async function () {
       let newRating = 4;
       var info = await mediaInfo.setRating(jpgFileCopy, newRating);
-      console.log(info)
       // assert.equal(info.UserRating, newRating);
       info = await mediaInfo.readMediaInfo(jpgFileCopy);
       assert.equal(info.UserRating, newRating);
