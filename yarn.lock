@@ -792,9 +792,9 @@ json-stable-stringify-without-jsonify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz#9db7b59496ad3f3cfef30a75142d2d930ad72651"
 
-kopparmora-xmp-reader@1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/kopparmora-xmp-reader/-/kopparmora-xmp-reader-1.1.2.tgz#290099fdfef9d561e1819c493c8fb423b077b75e"
+kopparmora-xmp-reader@1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/kopparmora-xmp-reader/-/kopparmora-xmp-reader-1.1.4.tgz#80b0bb4dd33f139e1d7bae8025294c8260aa0a64"
   dependencies:
     sax "^1.2.1"
 
