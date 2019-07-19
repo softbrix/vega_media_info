@@ -2,6 +2,10 @@
   "name": "vega-media-info",
   "version": "2.5.0",
   "description": "An image and video meta data extracter/updater",
+  "browser": {
+    "child_process": false,
+    "fs": false
+  },
   "main": "index.js",
   "scripts": {
     "pretest": "cp test_data/img1.jpg test_data/fresh.jpg",
@@ -27,9 +31,9 @@
   "author": "Andreas Sehr",
   "license": "GPL-3.0",
   "dependencies": {
-    "exif": "^0.6.0",
-    "hemmesta-jpeg-meta": "1.3.1",
-    "kopparmora-xmp-reader": "1.1.2",
+    "vimmerby-exif": "0.9.0",
+    "hemmesta-jpeg-meta": "1.3.2",
+    "kopparmora-xmp-reader": "1.1.4",
     "mp4box": "0.3.19",
     "node-iptc": "^1.0.5"
   },

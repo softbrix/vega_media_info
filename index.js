@@ -1,11 +1,11 @@
 /* jshint: node */
 
 'use strict';
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const path = require('path');
 
 const metaReader = require('hemmesta-jpeg-meta'); // This will extract meta blocks from JPEG
-const ExifImage = require('exif').ExifImage; // This will read exif info
+const ExifImage = require('vimmerby-exif'); // This will read exif info
 const iptc = require('node-iptc'); // This will only return the keywords tag
 const xmpReader = require('kopparmora-xmp-reader'); // This will read xmp info
 const jpgSize = require('./lib/jpgSize'); // This will read xmp info
