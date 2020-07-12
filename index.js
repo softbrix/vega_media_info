@@ -42,21 +42,22 @@ function isNumeric (n) {
 }
 
 // ex: 2015:12:11 12:10:09
-const dateRegexp = /^([\d]{2,4}).?(\d{1,2}).?(\d{1,2})\s(\d{1,2}).?(\d{1,2}).?(\d{1,2})/;
+const dateRegexp = /^([\d]{2,4}).?(\d{1,2}).?(\d{1,2})\s(\d{1,2}).?(\d{1,2}).?(\d{1,2}).?(\d{1,3})/;
 
 // The exif date is not compatible with the js date format and needs to be transformed
 var normalizeDate = function (date) {
   var d = dateRegexp.exec(date);
   if (d) {
     if (d.length > 3) {
-      return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6], 0).toLocaleString();
+      date = new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6], d[7]);
     }
   } else if (isNumeric(date)) {
-    return new Date(parseFloat(date)).toLocaleString();
-  } else if (date !== undefined && date.toLocaleString !== undefined) {
-    return date.toLocaleString();
+    date = new Date(parseFloat(date));
   }
-  return date;
+  if (date !== undefined) {
+    return date.toISOString();
+  }
+  return undefined;
 };
 
 var exifImage = function (buffer) {

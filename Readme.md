@@ -13,8 +13,8 @@ information extraction and inserts.
 Calling the readMediaInfo method will return the following information about a file:
 
 {
-  CreateDate: '2003-12-14 12:01:44',
-  ModifyDate: '2003-12-14 12:01:44',
+  CreateDate: '2003-12-14T11:42:20.000Z',
+  ModifyDate: '2003-12-14T11:42:20.000Z',
   Width: 2272,
   Height: 1704,
   Regions: [Face/Focus region information],
