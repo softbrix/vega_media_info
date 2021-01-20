@@ -57,7 +57,7 @@ describe('Vega Media Info', function () {
     });
 
     it('should return information for simple .MOV file', function () {
-      return mediaInfo.readMediaInfo(movFile, true)
+      return mediaInfo.readMediaInfo(movFile)
         .then(function (info) {
           assert.ok(info);
           assert.equal(info.CreateDate, info.ModifyDate);
