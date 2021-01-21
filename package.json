@@ -1,6 +1,6 @@
 {
   "name": "vega-media-info",
-  "version": "2.6.2",
+  "version": "2.6.3",
   "description": "An image and video meta data extracter/updater",
   "browser": {
     "child_process": false,
