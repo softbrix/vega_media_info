@@ -49,7 +49,7 @@ var normalizeDate = function (date) {
   var d = dateRegexp.exec(date);
   if (d) {
     if (d.length > 3) {
-      date = new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6], d[7]);
+      date = new Date(Date.UTC(d[1], d[2] - 1, d[3], d[4], d[5], d[6], d[7]));
     }
   } else if (isNumeric(date)) {
     date = new Date(parseFloat(date));
