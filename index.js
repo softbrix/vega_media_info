@@ -22,8 +22,8 @@ const tagHolderItpc = 'keywords';
 const ratingHolderXmp = 'xmp:Rating';
 const tagsDelimiter = ';';
 const isMp4Regexp = /((m)pe?g|m4a|m4v|mp4|mov)$/i;
-const exifRegexp = /((j|m)pe?g|m4a|m4v|mp4|mov|avi)$/i;
-const isImageRegexp = /(jpe?g|png|tiff|img)$/i;
+const exifRegexp = /((j|m)pe?g|m4a|m4v|mp4|mov|avi|heic)$/i;
+const isImageRegexp = /(jpe?g|png|tiff|img|heic)$/i;
 
 function isImage (filePath) {
   return isImageRegexp.test(path.basename(filePath));
