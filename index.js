@@ -165,14 +165,11 @@ var processExifTool = function (fileName, args) {
         }
 
         var createDate = metadata.createDate;
-        if (createDate === undefined) {
-          createDate = metadata['date/timeOriginal'];
-        }
-        if (createDate === undefined || createDate === '0000:00:00 00:00:00') {
-          createDate = metadata['fileModificationDate/Time'];
+        if (createDate === '0000:00:00 00:00:00') {
+          createDate = undefined;
         }
         var modifyDate = metadata.modifyDate;
-        if (modifyDate === undefined || modifyDate === '0000:00:00 00:00:00') {
+        if (modifyDate === '0000:00:00 00:00:00') {
           modifyDate = createDate;
         }
 
