@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install xmllint
+    - name: Install exiftool
       run: sudo apt-get update; sudo apt-get install -y exiftool
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
